@@ -24,10 +24,10 @@ def load_data():
         'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/dofus_disease_qa_pairs.json',
         'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/drugbank_drug_qa_pairs.json',
         'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/medlineplus_disease_qa_pairs.json',
-        'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/medlineplus_symptom_qa_pairs.json',
-        'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/webmd_qa_pairs.json',
-        'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/dofus_symptom_qa_pairs.json',
-        'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/nih_drug_qa_pairs.json',
+        #'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/medlineplus_symptom_qa_pairs.json',
+        #'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/webmd_qa_pairs.json',
+        #'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/dofus_symptom_qa_pairs.json',
+        #'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/nih_drug_qa_pairs.json',
     ]
 
     for url in json_urls:
