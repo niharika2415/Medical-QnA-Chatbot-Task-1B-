@@ -5,6 +5,7 @@ import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import os
+import subprocess
 
 # --- Helper Functions ---
 
@@ -14,7 +15,8 @@ def load_data():
     Downloads and loads a subset of the MedQuAD dataset from GitHub.
     This function caches the data to avoid re-downloading on every run.
     """
-    st.info("Downloading and processing medical data...")
+    status = st.empty()
+    status.info("Downloading and processing medical data...")
     data = []
     # A list of raw JSON URLs from the MedQuAD dataset on GitHub
     # This list has been expanded to include more data sources.
@@ -39,12 +41,12 @@ def load_data():
                     "answer": item.get("answer")
                 })
         except requests.exceptions.RequestException as e:
-            st.error(f"Error downloading data from {url}: {e}")
+            status.error(f"Error downloading data from {url}: {e}")
             return pd.DataFrame() # Return an empty DataFrame on error
 
     df = pd.DataFrame(data)
     df.dropna(subset=['question', 'answer'], inplace=True)
-    st.success("Data loaded successfully!")
+    status.success("Data loaded successfully!")
     return df
 
 @st.cache_resource
@@ -52,19 +54,31 @@ def load_spacy_model():
     """
     Loads the scispaCy model for medical entity recognition.
     This function caches the model to avoid reloading it on every run.
+    It will also download the model if it's not present.
     """
-    st.info("Loading scispaCy model for entity recognition...")
+    status = st.empty()
+    status.info("Loading scispaCy model for entity recognition...")
+    model_name = "en_core_sci_sm"
     try:
-        nlp = spacy.load("en_core_sci_sm")
-        st.success("scispaCy model loaded!")
+        # Try to load the model
+        nlp = spacy.load(model_name)
+        status.success("scispaCy model loaded!")
         return nlp
     except OSError:
-        st.error(
-            "Could not find the 'en_core_sci_sm' model. "
-            "Please run `pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.1/en_core_sci_sm-0.5.1.tar.gz` "
-            "and `pip install scispacy` in your terminal."
-        )
-        return None
+        status.warning(f"Model '{model_name}' not found. Attempting to download...")
+        try:
+            # Use subprocess to run the download command
+            subprocess.run(["python", "-m", "spacy", "download", model_name], check=True)
+            nlp = spacy.load(model_name)
+            status.success(f"Model '{model_name}' downloaded and loaded successfully!")
+            return nlp
+        except Exception as e:
+            status.error(
+                f"Error downloading or loading the '{model_name}' model. "
+                "Please ensure scispaCy is properly installed and the model "
+                f"is available: {e}"
+            )
+            return None
 
 def find_best_answer(question, df, vectorizer, tfidf_matrix):
     """
@@ -100,7 +114,7 @@ def recognize_medical_entities(text, nlp):
 
 def main():
     st.set_page_config(page_title="Medical Chatbot", page_icon="💊")
-    st.title("👨‍⚕️ Medical Q&A Chatbot")
+    st.title("�‍⚕️ Medical Q&A Chatbot")
     st.markdown(
         """
         <style>
