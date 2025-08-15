@@ -1,4 +1,0 @@
-[server]
-# Use a stable Python version for deployment to avoid compilation errors.
-# Python 3.9 has better support for pre-compiled binary packages required by spacy.
-pythonVersion = "3.9"
