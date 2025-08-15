@@ -18,7 +18,7 @@ def load_data():
     data = []
     # Using a subset of the data for a good balance between speed and knowledge base
     json_urls = [
-        'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/dofus_disease_qa_pairs.json',
+        # This link has been removed because it was causing a 404 error
         'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/drugbank_drug_qa_pairs.json',
         'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/webmd_qa_pairs.json',
     ]
