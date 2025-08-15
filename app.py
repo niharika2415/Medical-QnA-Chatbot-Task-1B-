@@ -1,11 +1,9 @@
 import streamlit as st
 import pandas as pd
 import requests
-import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import os
-import subprocess
+import re
 
 # --- Helper Functions ---
 
@@ -18,7 +16,7 @@ def load_data():
     status = st.empty()
     status.info("Downloading and processing medical data...")
     data = []
-    # Using a subset of the data for faster deployment
+    # Using a subset of the data for a good balance between speed and knowledge base
     json_urls = [
         'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/dofus_disease_qa_pairs.json',
         'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/drugbank_drug_qa_pairs.json',
@@ -44,64 +42,40 @@ def load_data():
     status.success("Data loaded successfully!")
     return df
 
-@st.cache_resource
-def load_spacy_model():
-    """
-    Loads the scispaCy model for medical entity recognition.
-    This function caches the model to avoid reloading it on every run.
-    """
-    status = st.empty()
-    status.info("Loading scispaCy model for entity recognition...")
-    try:
-        # The model is now installed via install.sh so we can simply load it
-        nlp = spacy.load("en_core_sci_sm")
-        status.success("scispaCy model loaded!")
-        return nlp
-    except OSError:
-        status.error(
-            """
-            The required spaCy model could not be found. This often happens because the model
-            was not correctly installed during deployment.
-
-            Please ensure your Streamlit Cloud app is configured to run `install.sh`
-            and that the `install.sh` file contains the correct installation commands.
-            """
-        )
-        return None
-    except Exception as e:
-        status.error(
-            f"An unexpected error occurred while loading the spacy model. Please check the logs for more details. Error: {e}"
-        )
-        return None
-
 def find_best_answer(question, df, vectorizer, tfidf_matrix):
     """
     Uses TF-IDF and cosine similarity to find the most relevant answer.
     """
-    # Transform the user's question into a TF-IDF vector
     try:
         query_vec = vectorizer.transform([question])
     except ValueError:
         return "Sorry, I can't find an answer for that. Please try a different query."
 
-    # Compute cosine similarity between the query and all answers
     cosine_similarities = cosine_similarity(query_vec, tfidf_matrix).flatten()
-
-    # Get the index of the most similar answer
     most_similar_index = cosine_similarities.argmax()
 
-    # Check if the similarity score is high enough
-    if cosine_similarities[most_similar_index] > 0.1: # A simple threshold
+    if cosine_similarities[most_similar_index] > 0.1:
         return df.iloc[most_similar_index]['answer']
     else:
         return "I'm sorry, I couldn't find a good answer for that question. Can you please rephrase?"
 
-def recognize_medical_entities(text, nlp):
+def recognize_medical_entities(text):
     """
-    Identifies medical entities in a given text using the loaded scispaCy model.
+    Identifies basic medical entities in a given text using a simple dictionary lookup.
     """
-    doc = nlp(text)
-    entities = [ent.text for ent in doc.ents]
+    entities = []
+    medical_terms = {
+        'symptoms': ['fever', 'headache', 'cough', 'nausea', 'fatigue', 'dizziness'],
+        'diseases': ['diabetes', 'hypertension', 'influenza', 'asthma', 'cancer'],
+        'drugs': ['ibuprofen', 'acetaminophen', 'aspirin', 'penicillin', 'lipitor']
+    }
+
+    for term_type, terms in medical_terms.items():
+        for term in terms:
+            # Use regex to find the term as a whole word
+            if re.search(r'\b' + re.escape(term) + r'\b', text.lower()):
+                entities.append(term)
+    
     return entities
 
 # --- Main Streamlit Application ---
@@ -129,11 +103,10 @@ def main():
 
     st.markdown("Ask a medical question about diseases or drugs, and I'll do my best to answer it based on the MedQuAD dataset.")
 
-    # Load data and the scispaCy model
+    # Load data
     df = load_data()
-    nlp = load_spacy_model()
 
-    if df.empty or nlp is None:
+    if df.empty:
         st.stop()
 
     # Initialize the TF-IDF Vectorizer
@@ -153,11 +126,10 @@ def main():
                 st.write(best_answer)
 
                 # Recognize and display medical entities
-                if nlp:
-                    entities = recognize_medical_entities(user_question, nlp)
-                    if entities:
-                        st.subheader("Medical Entities Found:")
-                        st.write(", ".join(entities))
+                entities = recognize_medical_entities(user_question)
+                if entities:
+                    st.subheader("Medical Entities Found:")
+                    st.write(", ".join(entities))
         else:
             st.warning("Please enter a question to get an answer.")
 
