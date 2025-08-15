@@ -21,7 +21,11 @@ def load_data():
         {"question": "What is the function of penicillin?", "answer": "Penicillin is a group of antibiotics used to treat a wide range of bacterial infections. It works by interfering with the formation of the bacteria's cell wall."},
         {"question": "What is the cause of asthma?", "answer": "The exact cause of asthma is not known. It is believed to be caused by a combination of genetic and environmental factors. Common triggers include pollen, dust mites, mold, and smoke."},
         {"question": "What are the side effects of Ibuprofen?", "answer": "The most common side effects of ibuprofen are nausea, vomiting, stomach pain, and heartburn. It can also increase the risk of heart attack or stroke."},
-        {"question": "What is cancer?", "answer": "Cancer is a disease caused by an uncontrolled division of abnormal cells in a part of the body. It can spread to other parts of the body."}
+        {"question": "What is cancer?", "answer": "Cancer is a disease caused by an uncontrolled division of abnormal cells in a part of the body. It can spread to other parts of the body."},
+        {"question": "What is COVID-19?", "answer": "COVID-19 is a highly contagious disease caused by the SARS-CoV-2 virus. Symptoms range from mild to severe and include fever, cough, and shortness of breath."},
+        {"question": "How do you treat a cold?", "answer": "There is no cure for the common cold, but you can relieve symptoms with rest, fluids, and over-the-counter medications like decongestants and pain relievers."},
+        {"question": "What are the symptoms of a sprained ankle?", "answer": "A sprained ankle is often characterized by pain, swelling, bruising, and limited range of motion. It occurs when the ligaments are stretched or torn."},
+        {"question": "What is insulin?", "answer": "Insulin is a hormone produced by the pancreas that regulates the amount of glucose in the blood. Insulin resistance is a key factor in type 2 diabetes."}
     ]
     df = pd.DataFrame(data)
     st.success("Data loaded successfully!")
