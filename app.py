@@ -1,54 +1,30 @@
 import streamlit as st
 import pandas as pd
-import requests
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import re
-import xml.etree.ElementTree as ET
 
 # --- Helper Functions ---
 
 @st.cache_data
 def load_data():
     """
-    Downloads and loads the MedQuAD dataset from GitHub, correctly parsing XML files.
+    Creates a small, hard-coded subset of the MedQuAD dataset.
+    This bypasses all network requests and ensures the app can always run.
     """
-    status = st.empty()
-    status.info("Downloading and processing medical data from MedQuAD...")
-    data = []
-    # These are the correct URLs to the MedQuAD XML files, as you pointed out.
-    xml_urls = [
-        'https://raw.githubusercontent.com/abachaa/MedQuAD/master/10_MPlus_ADAM_QA/10_MPlus_ADAM_QA.xml',
-        'https://raw.githubusercontent.com/abachaa/MedQuAD/master/11_MPlusDrugs_QA/11_MPlusDrugs_QA.xml',
-        'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_MPlus_Health_Topics_QA/4_MPlus_Health_Topics_QA.xml',
+    st.info("Using embedded medical data...")
+    data = [
+        {"question": "What is diabetes?", "answer": "Diabetes is a chronic, metabolic disease characterized by elevated levels of blood glucose (or blood sugar), which leads over time to serious damage to the heart, blood vessels, eyes, kidneys and nerves."},
+        {"question": "Symptoms of influenza?", "answer": "The most common symptoms of influenza are fever, cough, sore throat, and muscle aches. It is a viral infection that attacks your respiratory system."},
+        {"question": "How to treat a headache?", "answer": "Headaches can often be treated with over-the-counter pain relievers like ibuprofen or acetaminophen. Rest and staying hydrated can also help."},
+        {"question": "What is hypertension?", "answer": "Hypertension, also known as high blood pressure, is a serious medical condition. It can be caused by various factors and is a major risk factor for cardiovascular disease."},
+        {"question": "What is the function of penicillin?", "answer": "Penicillin is a group of antibiotics used to treat a wide range of bacterial infections. It works by interfering with the formation of the bacteria's cell wall."},
+        {"question": "What is the cause of asthma?", "answer": "The exact cause of asthma is not known. It is believed to be caused by a combination of genetic and environmental factors. Common triggers include pollen, dust mites, mold, and smoke."},
+        {"question": "What are the side effects of Ibuprofen?", "answer": "The most common side effects of ibuprofen are nausea, vomiting, stomach pain, and heartburn. It can also increase the risk of heart attack or stroke."},
+        {"question": "What is cancer?", "answer": "Cancer is a disease caused by an uncontrolled division of abnormal cells in a part of the body. It can spread to other parts of the body."}
     ]
-
-    for url in xml_urls:
-        try:
-            response = requests.get(url)
-            response.raise_for_status()  # Check for HTTP errors
-            
-            # Use ElementTree to parse the XML content
-            root = ET.fromstring(response.content)
-            for qa_pair in root.findall('.//QAPair'):
-                question = qa_pair.find('Question').text
-                answer = qa_pair.find('Answer').text
-                if question and answer:
-                    data.append({
-                        "question": question,
-                        "answer": answer
-                    })
-
-        except requests.exceptions.RequestException as e:
-            status.error(f"Error downloading data from {url}: {e}")
-            return pd.DataFrame() 
-        except ET.ParseError as e:
-            status.error(f"Error parsing XML from {url}: {e}")
-            return pd.DataFrame()
-
     df = pd.DataFrame(data)
-    df.dropna(subset=['question', 'answer'], inplace=True)
-    status.success("Data loaded successfully!")
+    st.success("Data loaded successfully!")
     return df
 
 def find_best_answer(question, df, vectorizer, tfidf_matrix):
@@ -109,7 +85,7 @@ def main():
         unsafe_allow_html=True
     )
 
-    st.markdown("Ask a medical question about diseases or drugs, and I'll do my best to answer it based on the MedQuAD dataset.")
+    st.markdown("Ask a medical question about diseases or drugs, and I'll do my best to answer it.")
 
     # Load data
     df = load_data()
