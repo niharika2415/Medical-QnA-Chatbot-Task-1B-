@@ -5,6 +5,7 @@ import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import os
+import subprocess
 
 # --- Helper Functions ---
 
@@ -22,11 +23,6 @@ def load_data():
         'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/dofus_disease_qa_pairs.json',
         'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/drugbank_drug_qa_pairs.json',
         'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/webmd_qa_pairs.json',
-        # Uncomment these lines to add more data after successful deployment
-        # 'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/medlineplus_disease_qa_pairs.json',
-        # 'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/medlineplus_symptom_qa_pairs.json',
-        # 'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/dofus_symptom_qa_pairs.json',
-        # 'https://raw.githubusercontent.com/abachaa/MedQuAD/master/4_QA_json/nih_drug_qa_pairs.json',
     ]
 
     for url in json_urls:
@@ -53,13 +49,11 @@ def load_spacy_model():
     """
     Loads the scispaCy model for medical entity recognition.
     This function caches the model to avoid reloading it on every run.
-    It provides an error message to the user if the model is not found,
-    along with instructions on how to fix it.
     """
     status = st.empty()
     status.info("Loading scispaCy model for entity recognition...")
     try:
-        # The model is now installed via packages.txt so we can simply load it
+        # The model is now installed via install.sh so we can simply load it
         nlp = spacy.load("en_core_sci_sm")
         status.success("scispaCy model loaded!")
         return nlp
@@ -69,12 +63,8 @@ def load_spacy_model():
             The required spaCy model could not be found. This often happens because the model
             was not correctly installed during deployment.
 
-            To fix this, please ensure you have a `packages.txt` file in your repository
-            with the following line:
-
-            `https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.1/en_core_sci_sm-0.5.1.tar.gz`
-
-            This will instruct Streamlit Cloud to install the pre-built model directly.
+            Please ensure your Streamlit Cloud app is configured to run `install.sh`
+            and that the `install.sh` file contains the correct installation commands.
             """
         )
         return None
